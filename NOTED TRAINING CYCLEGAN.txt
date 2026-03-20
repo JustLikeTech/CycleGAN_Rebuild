@@ -1,0 +1,101 @@
+Note training CycleGAN 
+
+dataset & input 
+dataset_mode = unaligned (prinsip CycleGAN, data tidak berpasangan)
+input_nc = 3 (input RGB) 
+output_nc = 3 (output juga RGB)
+
+ukuran gambar
+load_size = 416
+crop_size = 416
+preprocess = none 
+(gamnbar tidak diresize atau crop lagi)
+
+arch model
+model = cycleGAN
+netG = resnet_9blocks (generator memakai resnet9 block)
+netD = basic (discriminator patchGAN)
+
+hyper param
+lr (learning rate) = 0.0002
+batch_size = 1 (standart GAN, stabil)
+beta1 = 0.5 (param optimizer adam)
+ 
+loss param 
+Cycle Consistency Loss 
+	lambda_A = 10.0
+	lambda_B = 10.0
+
+identify loss
+	lambda_identify = 0.5
+
+epoch
+n_epoch = 100 (learning normal)
+n_epoch_decay = 100 (leraning rate (decay))
+total = 200 epoch
+
+logging 
+use_wandb = True (pakai Weight & biases)
+no_html= False (memakai HTML (dominate))
+ 
+NOTE CAUTION!!!!!
+device 
+Initialized with device cpu
+(training berjalan di CPU bukan GPU, mengakibatkan durasi dan beban training yang tidak optimal)
+
+NOTE CAUTION!!!
+dataset [UnalignedDataset] was created
+The number of training images = 120
+(dataset yang digunakan hanya 120 dengan format unpaired (domain A & B), rawan overfitting untuk model CycleGAN)
+
+==============================================
+CAUTION & THERE IS A SOLUTION HERE!!!
+warning data loader
+
+UserWarning: This DataLoader will create 4 worker processes in total. Our suggested max number of worker in current system is 2, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  self.check_worker_number_rationality()
+
+SUMMARY:
+suggested max number of worker is 2
+but using 4
+(sistem hanya optimal untuk 2 worker, tapi dalam program memakai 4 worker. Hal ini akan menyebabkan frezee)
+
+SOLUTION
+--num_threads 2
+
+=========================
+
+model initialization
+model [CycleGANModel] was created
+initialize network with normal
+(model telah berhasil dibuat, bobot awal menggunakan distribusi normal)
+
+jumlah param dalam model
+[Network G_A] 11.378 M
+[Network G_B] 11.378 M
+[Network D_A] 2.765 M
+[Network D_B] 2.765 M
+
+THAT MEANS
+
+| Network | Fungsi       | Parameter |
+| ------- | ------------ | --------- |
+| G_A     | A → B        | 11.3 juta |
+| G_B     | B → A        | 11.3 juta |
+| D_A     | cek domain A | 2.7 juta  |
+| D_B     | cek domain B | 2.7 juta  |
+
+generator jauh lebih kompleks dari discriminator
+
+
+PROBLEM NOTE FOR FUTURE!!!!!!
+Dataset kecil (120 gambar)
+Training di CPU
+Resolusi tinggi (416)
+
+HOPE NOTE FOR FUTURE!!!
+Dataset kecil (120 gambar)
+Training di GPU
+Resolusi tinggi (416)
+
+
